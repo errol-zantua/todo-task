@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -26,18 +27,29 @@ public class TaskController {
         if (task.isPresent()) {
             return TaskResponseHandler.generateResponse(task.get(), HttpStatus.OK);
         } else {
-            return TaskResponseHandler.generateResponse("task id " + id + " not found", task.get(), HttpStatus.NOT_FOUND);
+            return TaskResponseHandler.generateResponse("task id " + id + " not found", HttpStatus.NOT_FOUND);
         }
+    }
+
+    @GetMapping
+    public ResponseEntity<Object> getTasks() {
+        List<Task> tasks = taskRepository.findAll();
+
+        if (tasks.isEmpty()) {
+            return TaskResponseHandler.generateResponse("there are no tasks", HttpStatus.NO_CONTENT);
+        }
+
+        return TaskResponseHandler.generateResponse(tasks, HttpStatus.OK);
     }
 
     @PostMapping
     public ResponseEntity<Object> saveTask(@RequestBody Task task) {
-        if (task.getDescription() == null || task.getDescription().isEmpty()) {
-            return TaskResponseHandler.generateResponse("description should not be null or empty", task, HttpStatus.BAD_REQUEST);
+        if (task.getDescription() == null) {
+            return TaskResponseHandler.generateResponse("description should not be null", HttpStatus.BAD_REQUEST);
         }
 
         if (task.getPriority() == null) {
-            return TaskResponseHandler.generateResponse("priority should not be null or empty", task, HttpStatus.BAD_REQUEST);
+            return TaskResponseHandler.generateResponse("priority should not be null", HttpStatus.BAD_REQUEST);
         }
 
         Task savedTask = new Task(task.getDescription(), task.getPriority());
@@ -54,7 +66,7 @@ public class TaskController {
             taskRepository.save(task);
             return TaskResponseHandler.generateResponse(task, HttpStatus.OK);
         } else {
-            return TaskResponseHandler.generateResponse("task id " + id + " not found", task, HttpStatus.NOT_FOUND);
+            return TaskResponseHandler.generateResponse("task id " + id + " not found", HttpStatus.NOT_FOUND);
         }
     }
 }
