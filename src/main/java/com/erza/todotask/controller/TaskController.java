@@ -69,4 +69,16 @@ public class TaskController {
             return TaskResponseHandler.generateResponse("task id " + id + " not found", HttpStatus.NOT_FOUND);
         }
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Object> deleteTask(@PathVariable Long id) {
+        Optional<Task> deletedTask = taskRepository.findById(id);
+
+        if (deletedTask.isPresent()) {
+            taskRepository.delete(deletedTask.get());
+            return TaskResponseHandler.generateResponse("task id " + id + " deleted", HttpStatus.OK);
+        } else {
+            return TaskResponseHandler.generateResponse("task id " + id + " not found", HttpStatus.NOT_FOUND);
+        }
+    }
 }
