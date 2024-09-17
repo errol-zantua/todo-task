@@ -1,7 +1,9 @@
 package com.erza.todotask.controller;
 
+import com.erza.todotask.exception.TaskNotFoundException;
 import com.erza.todotask.handler.TaskResponseHandler;
 import com.erza.todotask.model.Task;
+import com.erza.todotask.model.TaskResult;
 import com.erza.todotask.repository.TaskRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -60,18 +62,21 @@ public class TaskController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Object> updateTask(@RequestBody Task task, @PathVariable Long id) {
-        if (task.getDescription() == null) {
+        if (task.getDescription() == null || task.getDescription().isEmpty()) {
             return TaskResponseHandler.generateResponse("Task description is required", HttpStatus.BAD_REQUEST);
         }
-
         Optional<Task> updatedTask = taskRepository.findById(id);
 
-        if (updatedTask.isPresent()) {
-            taskRepository.save(task);
-            return TaskResponseHandler.generateResponse(task, HttpStatus.OK);
-        } else {
+        if (!updatedTask.isPresent()) {
             return TaskResponseHandler.generateResponse("Cannot find task with given id " + id, HttpStatus.NOT_FOUND);
         }
+
+        updatedTask.get().setDescription(task.getDescription());
+        updatedTask.get().setPriority(task.getPriority());
+
+        taskRepository.save(updatedTask.get());
+
+        return TaskResponseHandler.generateResponse(task, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
