@@ -15,7 +15,6 @@ public class TaskResponseHandler {
         Map<String, Object> map = new HashMap<>();
         map.put("description", task.getDescription());
         map.put("priority", task.getPriority());
-        map.put("status", status.value());
 
         return new ResponseEntity<>(map, status);
     }

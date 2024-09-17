@@ -36,7 +36,7 @@ public class TaskController {
         List<Task> tasks = taskRepository.findAll();
 
         if (tasks.isEmpty()) {
-            return TaskResponseHandler.generateResponse("there are no tasks", HttpStatus.NO_CONTENT);
+            return TaskResponseHandler.generateResponse("there are no tasks", HttpStatus.NOT_FOUND);
         }
 
         return TaskResponseHandler.generateResponse(tasks, HttpStatus.OK);
@@ -60,13 +60,17 @@ public class TaskController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Object> updateTask(@RequestBody Task task, @PathVariable Long id) {
+        if (task.getDescription() == null) {
+            return TaskResponseHandler.generateResponse("Task description is required", HttpStatus.BAD_REQUEST);
+        }
+
         Optional<Task> updatedTask = taskRepository.findById(id);
 
         if (updatedTask.isPresent()) {
             taskRepository.save(task);
             return TaskResponseHandler.generateResponse(task, HttpStatus.OK);
         } else {
-            return TaskResponseHandler.generateResponse("task id " + id + " not found", HttpStatus.NOT_FOUND);
+            return TaskResponseHandler.generateResponse("Cannot find task with given id " + id, HttpStatus.NOT_FOUND);
         }
     }
 
